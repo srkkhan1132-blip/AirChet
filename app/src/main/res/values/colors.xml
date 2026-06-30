@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_dark">#121B22</color>
+    <color name="bg_dark_secondary">#1F2C34</color>
+    <color name="bg_appbar">#1F2C34</color>
+    <color name="accent_green">#00A884</color>
+    <color name="accent_green_dark">#008069</color>
+    <color name="bubble_sent">#005C4B</color>
+    <color name="bubble_received">#1F2C34</color>
+    <color name="text_primary">#E9EDEF</color>
+    <color name="text_secondary">#8696A0</color>
+    <color name="divider">#2A3942</color>
+    <color name="online_green">#00A884</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+</resources>

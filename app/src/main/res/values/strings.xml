@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AirChat</string>
+    <string name="title_discover">Nearby Devices</string>
+    <string name="btn_scan">Scan for Devices</string>
+    <string name="btn_create_group">Create Group</string>
+    <string name="no_devices_found">No devices found nearby.\nTap Scan to search.</string>
+    <string name="scanning">Scanning…</string>
+    <string name="hint_message">Type a message</string>
+    <string name="connecting">Connecting…</string>
+    <string name="connected">Connected</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="permission_required">Permissions Required</string>
+    <string name="permission_message">AirChat needs Bluetooth, Wi-Fi and Location permissions to find and chat with nearby devices.</string>
+    <string name="grant">Grant Permissions</string>
+    <string name="bluetooth_disabled">Please turn on Bluetooth to continue</string>
+    <string name="enable">Enable</string>
+</resources>
