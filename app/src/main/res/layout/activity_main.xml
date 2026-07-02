@@ -80,19 +80,6 @@
             android:text="Wi-Fi Direct"
             android:backgroundTint="@color/bg_dark_secondary"
             android:textColor="@color/text_primary" />
-        <Button
-        android:id="@+id/btnInternetChat"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp"
-        android:text="Internet Chat (Room)"
-        android:textColor="@color/accent_green"
-        android:paddingTop="14dp"
-        android:paddingBottom="14dp" />
 
 </LinearLayout>
 
@@ -146,18 +133,5 @@
         android:paddingTop="14dp"
         android:paddingBottom="14dp" />
 
-    <Button
-        android:id="@+id/btnInternetChat"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp"
-        android:text="Internet Chat (Room)"
-        android:textColor="@color/accent_green"
-        android:paddingTop="14dp"
-        android:paddingBottom="14dp" />
 
 </LinearLayout>
