@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
         wifiManager.setListener(wifiListener);
 
         btnScan.setOnClickListener(v -> onScanClicked());
+        findViewById(R.id.btnInternetChat).setOnClickListener(v -> startActivity(new android.content.Intent(this, InternetChatActivity.class)));
         btnModeBluetooth.setOnClickListener(v -> switchMode(MODE_BLUETOOTH));
         btnModeWifi.setOnClickListener(v -> switchMode(MODE_WIFI));
         btnCreateGroup.setOnClickListener(v ->

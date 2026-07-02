@@ -48,6 +48,7 @@
 
         <activity android:name=".DeviceListActivity" android:exported="false" />
         <activity android:name=".ChatActivity" android:exported="false" />
+        <activity android:name=".InternetChatActivity" android:exported="false" />
 
     </application>
 
