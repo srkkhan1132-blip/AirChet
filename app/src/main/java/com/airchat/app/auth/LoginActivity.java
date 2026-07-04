@@ -1,113 +1,101 @@
 package com.airchat.app.auth;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.airchat.app.MainActivity;
 import com.airchat.app.R;
-import com.google.firebase.FirebaseException;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.PhoneAuthCredential;
-import com.google.firebase.auth.PhoneAuthOptions;
-import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 public class LoginActivity extends AppCompatActivity {
-    private EditText etPhone, etOtp, etName;
-    private Button btnSendOtp, btnVerifyOtp, btnSaveName;
-    private LinearLayout panelPhone, panelOtp, panelName;
+    private static final int PICK_IMAGE = 100;
+    private EditText etName, etPhone;
+    private ImageView ivDp;
+    private Button btnSave;
     private ProgressBar progressBar;
-    private FirebaseAuth auth;
-    private String verificationId;
+    private Uri selectedImageUri;
+    private SharedPreferences prefs;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() != null) { goToMain(); return; }
-        etPhone = findViewById(R.id.etPhone);
-        etOtp = findViewById(R.id.etOtp);
+        prefs = getSharedPreferences("airchat", MODE_PRIVATE);
+        if (prefs.getString("uid", null) != null) {
+            goToMain(); return;
+        }
         etName = findViewById(R.id.etName);
-        btnSendOtp = findViewById(R.id.btnSendOtp);
-        btnVerifyOtp = findViewById(R.id.btnVerifyOtp);
-        btnSaveName = findViewById(R.id.btnSaveName);
-        panelPhone = findViewById(R.id.panelPhone);
-        panelOtp = findViewById(R.id.panelOtp);
-        panelName = findViewById(R.id.panelName);
+        etPhone = findViewById(R.id.etPhone);
+        ivDp = findViewById(R.id.ivDp);
+        btnSave = findViewById(R.id.btnSave);
         progressBar = findViewById(R.id.progressBar);
-        btnSendOtp.setOnClickListener(v -> sendOtp());
-        btnVerifyOtp.setOnClickListener(v -> verifyOtp());
-        btnSaveName.setOnClickListener(v -> saveName());
-    }
-    private void sendOtp() {
-        String phone = etPhone.getText().toString().trim();
-        if (phone.isEmpty() || phone.length() < 10) { etPhone.setError("Sahi number daalein"); return; }
-        if (!phone.startsWith("+")) phone = "+91" + phone;
-        progressBar.setVisibility(View.VISIBLE);
-        btnSendOtp.setEnabled(false);
-        PhoneAuthOptions options = PhoneAuthOptions.newBuilder(auth)
-                .setPhoneNumber(phone).setTimeout(60L, TimeUnit.SECONDS)
-                .setActivity(this)
-                .setCallbacks(new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-                    @Override
-                    public void onVerificationCompleted(PhoneAuthCredential credential) {
-                        progressBar.setVisibility(View.GONE);
-                        auth.signInWithCredential(credential).addOnSuccessListener(r -> checkProfile());
-                    }
-                    @Override
-                    public void onVerificationFailed(FirebaseException e) {
-                        progressBar.setVisibility(View.GONE);
-                        btnSendOtp.setEnabled(true);
-                        Toast.makeText(LoginActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                    @Override
-                    public void onCodeSent(String verId, PhoneAuthProvider.ForceResendingToken token) {
-                        progressBar.setVisibility(View.GONE);
-                        verificationId = verId;
-                        panelPhone.setVisibility(View.GONE);
-                        panelOtp.setVisibility(View.VISIBLE);
-                        Toast.makeText(LoginActivity.this, "OTP bheja gaya!", Toast.LENGTH_SHORT).show();
-                    }
-                }).build();
-        PhoneAuthProvider.verifyPhoneNumber(options);
-    }
-    private void verifyOtp() {
-        String otp = etOtp.getText().toString().trim();
-        if (otp.length() != 6) { etOtp.setError("6 digit OTP daalein"); return; }
-        progressBar.setVisibility(View.VISIBLE);
-        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, otp);
-        auth.signInWithCredential(credential).addOnCompleteListener(task -> {
-            progressBar.setVisibility(View.GONE);
-            if (task.isSuccessful()) checkProfile();
-            else Toast.makeText(this, "Galat OTP", Toast.LENGTH_SHORT).show();
+        ivDp.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("image/*");
+            startActivityForResult(intent, PICK_IMAGE);
         });
+        btnSave.setOnClickListener(v -> saveProfile());
     }
-    private void checkProfile() {
-        FirebaseFirestore.getInstance().collection("users")
-                .document(auth.getCurrentUser().getUid()).get()
-                .addOnSuccessListener(doc -> {
-                    if (doc.exists() && doc.getString("name") != null) goToMain();
-                    else { panelOtp.setVisibility(View.GONE); panelName.setVisibility(View.VISIBLE); }
-                });
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE && resultCode == RESULT_OK && data != null) {
+            selectedImageUri = data.getData();
+            ivDp.setImageURI(selectedImageUri);
+        }
     }
-    private void saveName() {
+    private void saveProfile() {
         String name = etName.getText().toString().trim();
-        if (name.isEmpty()) { etName.setError("Naam daalein"); return; }
-        String uid = auth.getCurrentUser().getUid();
+        String phone = etPhone.getText().toString().trim();
+        if (name.isEmpty()) { etName.setError("Naam zaroori hai"); return; }
+        if (phone.isEmpty() || phone.length() < 10) { etPhone.setError("Phone number zaroori hai"); return; }
+        progressBar.setVisibility(View.VISIBLE);
+        btnSave.setEnabled(false);
+        String uid = "user_" + phone.replaceAll("[^0-9]", "");
+        if (selectedImageUri != null) {
+            uploadDpAndSave(uid, name, phone);
+        } else {
+            saveToFirestore(uid, name, phone, "");
+        }
+    }
+    private void uploadDpAndSave(String uid, String name, String phone) {
+        new com.airchat.app.media.CloudinaryUploader(this).uploadMedia(
+            selectedImageUri, "image/jpeg",
+            new com.airchat.app.media.CloudinaryUploader.UploadCallback() {
+                @Override public void onSuccess(String url, String publicId) {
+                    saveToFirestore(uid, name, phone, url);
+                }
+                @Override public void onFailure(String error) {
+                    saveToFirestore(uid, name, phone, "");
+                }
+                @Override public void onProgress(int percent) {}
+            });
+    }
+    private void saveToFirestore(String uid, String name, String phone, String dpUrl) {
         Map<String, Object> user = new HashMap<>();
-        user.put("name", name);
-        user.put("phone", auth.getCurrentUser().getPhoneNumber());
         user.put("uid", uid);
+        user.put("name", name);
+        user.put("phone", phone);
+        user.put("dpUrl", dpUrl);
         user.put("online", true);
         FirebaseFirestore.getInstance().collection("users").document(uid).set(user)
-                .addOnSuccessListener(v -> goToMain());
+            .addOnSuccessListener(v -> {
+                prefs.edit().putString("uid", uid).putString("name", name)
+                    .putString("phone", phone).putString("dpUrl", dpUrl).apply();
+                goToMain();
+            })
+            .addOnFailureListener(e -> {
+                progressBar.setVisibility(View.GONE);
+                btnSave.setEnabled(true);
+                Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            });
     }
     private void goToMain() {
         startActivity(new Intent(this, MainActivity.class));

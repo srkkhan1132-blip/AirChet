@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
         btnScan.setOnClickListener(v -> onScanClicked());
         findViewById(R.id.btnInternetChat).setOnClickListener(v -> startActivity(new android.content.Intent(this, InternetChatActivity.class)));
+        findViewById(R.id.btnContacts).setOnClickListener(v -> startActivity(new android.content.Intent(this, com.airchat.app.contacts.ContactsActivity.class)));
         btnModeBluetooth.setOnClickListener(v -> switchMode(MODE_BLUETOOTH));
         btnModeWifi.setOnClickListener(v -> switchMode(MODE_WIFI));
         btnCreateGroup.setOnClickListener(v ->
