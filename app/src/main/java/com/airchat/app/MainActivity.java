@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         SharedPreferences prefs = getSharedPreferences("airchat", MODE_PRIVATE);
-        if (prefs.getString("uid", null) == null) {
+        if (false) {
             finish();
             return;
         }
