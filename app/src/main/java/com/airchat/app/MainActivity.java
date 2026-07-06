@@ -15,7 +15,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.airchat.app.adapter.DeviceAdapter;
-import com.airchat.app.auth.SignupActivity;
 import com.airchat.app.bluetooth.BluetoothChatManager;
 import com.airchat.app.model.NearbyDevice;
 import com.airchat.app.model.Protocol;
@@ -40,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         SharedPreferences prefs = getSharedPreferences("airchat", MODE_PRIVATE);
         if (prefs.getString("uid", null) == null) {
-            startActivity(new Intent(this, SignupActivity.class));
             finish();
             return;
         }
