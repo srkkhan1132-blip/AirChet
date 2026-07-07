@@ -57,13 +57,42 @@ public class ChatActivity extends AppCompatActivity {
         messageAdapter.addMessage(new ChatMessage("System","Connected to "+deviceName,ChatMessage.TYPE_SYSTEM));
         btnBack.setOnClickListener(v -> finish());
         btnSend.setOnClickListener(v -> sendTextMessage());
-        btnAttach.setOnClickListener(v -> Toast.makeText(this,"Coming soon",Toast.LENGTH_SHORT).show());
+        btnAttach.setOnClickListener(v -> { Intent i = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI); startActivityForResult(i, REQUEST_PICK_IMAGE); });
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_PICK_IMAGE && resultCode == RESULT_OK && data != null) {
+            android.net.Uri uri = data.getData();
+            if (uri == null) return;
+            try {
+                android.graphics.Bitmap bitmap = android.provider.MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                android.graphics.Bitmap scaled = android.graphics.Bitmap.createScaledBitmap(bitmap, Math.min(bitmap.getWidth(), 720), Math.min(bitmap.getHeight(), 720), true);
+                java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+                scaled.compress(android.graphics.Bitmap.CompressFormat.JPEG, 60, baos);
+                byte[] bytes = baos.toByteArray();
+                String payload = com.airchat.app.model.Protocol.encodeImage(myName, bytes);
+                boolean sent = connectionType == com.airchat.app.model.NearbyDevice.TYPE_BLUETOOTH ? bluetoothManager.sendTo(deviceAddress, payload) : wifiManager.sendTo(deviceAddress, payload);
+                if (sent) {
+                    String path = uri.getPath();
+                    messageAdapter.addMessage(new com.airchat.app.model.ChatMessage(myName, null, path, com.airchat.app.model.ChatMessage.TYPE_SENT, com.airchat.app.model.ChatMessage.CONTENT_IMAGE));
+                    recyclerMessages.scrollToPosition(messageAdapter.getItemCount()-1);
+                }
+            } catch (Exception e) {
+                android.widget.Toast.makeText(this, "Error: " + e.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     private void sendTextMessage() {
         String text = etMessage.getText().toString().trim();
         if (TextUtils.isEmpty(text)) return;
         String payload = Protocol.encodeText(myName, text);
-        boolean sent = connectionType == NearbyDevice.TYPE_BLUETOOTH ? bluetoothManager.sendTo(deviceAddress, payload) : wifiManager.sendTo(deviceAddress, payload);
+        boolean sent = false;
+        try {
+            sent = connectionType == NearbyDevice.TYPE_BLUETOOTH ? bluetoothManager.sendTo(deviceAddress, payload) : wifiManager.sendTo(deviceAddress, payload);
+        } catch (Exception e) { sent = false; }
         if (sent) {
             messageAdapter.addMessage(new ChatMessage(myName, text, ChatMessage.TYPE_SENT));
             etMessage.setText("");
