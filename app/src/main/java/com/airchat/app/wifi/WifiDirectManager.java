@@ -207,8 +207,11 @@ public class WifiDirectManager {
             return false;
         }
     }
-    public void broadcast(String payload) {
-        for (String addr : new ArrayList<>(activeSockets.keySet())) sendTo(addr, payload);
+    public boolean broadcast(String payload) {
+        if (activeSockets.isEmpty()) return false;
+        boolean ok = false;
+        if (sendTo(address, payload)) ok = true;
+        return ok;
     }
     public boolean isConnectedToAny() { return !activeSockets.isEmpty(); }
     public java.util.List<String> getConnectedAddresses() { return new java.util.ArrayList<>(activeSockets.keySet()); }
