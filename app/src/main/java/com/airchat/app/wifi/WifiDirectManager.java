@@ -210,7 +210,9 @@ public class WifiDirectManager {
     public boolean broadcast(String payload) {
         if (activeSockets.isEmpty()) return false;
         boolean ok = false;
-        if (sendTo(address, payload)) ok = true;
+        for (String address : new java.util.ArrayList<>(activeSockets.keySet())) {
+            if (sendTo(address, payload)) ok = true;
+        }
         return ok;
     }
     public boolean isConnectedToAny() { return !activeSockets.isEmpty(); }
