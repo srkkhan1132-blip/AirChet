@@ -27,7 +27,7 @@ public class ChatActivity extends AppCompatActivity {
     private MessageAdapter messageAdapter;
     private BluetoothChatManager bluetoothManager;
     private WifiDirectManager wifiManager;
-    private String deviceName, deviceAddress, myName;
+    private String deviceName, deviceAddress, myName; // mutable for wifi direct
     private int connectionType;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +91,14 @@ public class ChatActivity extends AppCompatActivity {
         String payload = Protocol.encodeText(myName, text);
         boolean sent = false;
         try {
-            sent = connectionType == NearbyDevice.TYPE_BLUETOOTH ? bluetoothManager.sendTo(deviceAddress, payload) : wifiManager.sendTo(deviceAddress, payload);
+            if (connectionType == NearbyDevice.TYPE_BLUETOOTH) {
+                sent = bluetoothManager.sendTo(deviceAddress, payload);
+            } else {
+                for (String addr : wifiManager.getConnectedAddresses()) {
+                    sent = wifiManager.sendTo(addr, payload);
+                    if (sent) { deviceAddress = addr; break; }
+                }
+            }
         } catch (Exception e) { sent = false; }
         if (sent) {
             messageAdapter.addMessage(new ChatMessage(myName, text, ChatMessage.TYPE_SENT));
