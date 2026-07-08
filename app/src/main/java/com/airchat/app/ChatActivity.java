@@ -94,10 +94,7 @@ public class ChatActivity extends AppCompatActivity {
             if (connectionType == NearbyDevice.TYPE_BLUETOOTH) {
                 sent = bluetoothManager.sendTo(deviceAddress, payload);
             } else {
-                for (String addr : wifiManager.getConnectedAddresses()) {
-                    sent = wifiManager.sendTo(addr, payload);
-                    if (sent) { deviceAddress = addr; break; }
-                }
+                sent = wifiManager.broadcast(payload);
             }
         } catch (Exception e) { sent = false; }
         if (sent) {
