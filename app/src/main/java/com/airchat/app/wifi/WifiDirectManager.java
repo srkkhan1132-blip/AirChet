@@ -211,6 +211,7 @@ public class WifiDirectManager {
         for (String addr : new ArrayList<>(activeSockets.keySet())) sendTo(addr, payload);
     }
     public boolean isConnectedToAny() { return !activeSockets.isEmpty(); }
+    public java.util.List<String> getConnectedAddresses() { return new java.util.ArrayList<>(activeSockets.keySet()); }
     public void disconnectGroup() {
         if (!isSupported()) return;
         try { manager.removeGroup(channel, null); } catch (SecurityException e) {}
